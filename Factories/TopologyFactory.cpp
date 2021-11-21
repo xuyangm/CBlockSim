@@ -75,6 +75,8 @@ void TopologyFactory::ProduceNodesByDistrib(std::vector<unique_ptr<Node>>& nodeP
             }
         }
     }
+
+    // Hash Power falls in Gaussian distribution
     default_random_engine gen;
     normal_distribution<double> dis(5,1);
     for (int i=0; i < NODES_NUM; i++) {
@@ -87,4 +89,10 @@ void TopologyFactory::ProduceNodesByDistrib(std::vector<unique_ptr<Node>>& nodeP
         tmp += nodePool[i]->hashPower;
     }
     nodePool[NODES_NUM-1]->hashPower = 1 - tmp;
+
+    // Stake falls in Gaussian distribution
+    for (int i=0; i < NODES_NUM; i++) {
+        nodePool[i]->stake = dis(gen);
+        nodePool[i]->stakeTime = 0;
+    }
 }

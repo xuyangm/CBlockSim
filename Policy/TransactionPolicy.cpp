@@ -32,7 +32,8 @@ void TransactionPolicy::PropagationTxn(double timestamp, vector<unique_ptr<Node>
 
 void TransactionPolicy::SelectTxn(multiset<Event>::iterator e, vector<unique_ptr<Node>> &nodePool, vector<shared_ptr<Transaction>> &txPool)
 {
-    LoadEthereumTxnSelection(e, nodePool, txPool);
+	if(FLAG == 0) LoadBitcoinTxnSelection(e, nodePool, txPool);
+    if(FLAG == 1) LoadEthereumTxnSelection(e, nodePool, txPool);
 }
 
 void TransactionPolicy::LoadEthereumTxnSelection(multiset<Event>::iterator e, vector<unique_ptr<Node>> &nodePool, vector<shared_ptr<Transaction>> &txPool)

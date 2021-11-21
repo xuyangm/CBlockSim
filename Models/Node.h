@@ -15,6 +15,8 @@ public:
 	int location;
 	int neighborNum;
 	double hashPower;
+	double stake;
+	double stakeTime;
 	double balance;
 	int high, low;
 	bitset<TX_NUM> txPool;

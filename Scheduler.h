@@ -7,6 +7,7 @@
 #include "Policy/TransactionPolicy.h"
 #include "Policy/BlockPolicy.h"
 #include "EventEngine.h"
+#include "Statistics.h"
 #include <set>
 
 using namespace std;
@@ -21,6 +22,7 @@ public:
 
 	int totalGenBlocks;
 	int globalchain;
+	Statistics st;
 	TransactionFactory txGenerator;
 	TopologyFactory topoGenerator;
 	TransactionPolicy txnPolicy;
@@ -44,5 +46,5 @@ public:
 	void PropagateBlock(shared_ptr<Block> block);
 	void ResolveFork();
 	void DistributeRewards();
-	double ShowStatistics();
+	double ShowStatistics(int rd, double t);
 };

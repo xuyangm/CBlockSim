@@ -95,7 +95,7 @@ void Scheduler::PropagateBlock(shared_ptr<Block> block)
 
 void Scheduler::ResolveFork()
 {
-	if(LONGEST) {
+	if(FINALIZE_POLICY == 0) {
 		map<int, int> counter;
 		int maxDepth = 0;
 		for (int i = 0; i < NODES_NUM; i++) {
@@ -122,7 +122,7 @@ void Scheduler::ResolveFork()
 				break;
 			}
 		}
-	} else if(GHOST) {
+	} else if(FINALIZE_POLICY == 1) {
 		map<int, int> counter;
 		int maxDiff = 0;
 		for (int i = 0; i < NODES_NUM; i++) {
@@ -172,11 +172,10 @@ void Scheduler::DistributeRewards()
 	}
 }
 
-double Scheduler::ShowStatistics()
+double Scheduler::ShowStatistics(int rd, double t)
 {
 	double res;
 	set<int> check;
-	cout << "Statistics:" << endl;
 	int mainBlocks = nodePool[globalchain]->mainchain.size();
 	int uncleBlocks = 0;
 	double averBlockSize = 0;
@@ -188,29 +187,10 @@ double Scheduler::ShowStatistics()
 	double uncleRate = (double)uncleBlocks / (mainBlocks+uncleBlocks);
 	double staleRate = (double)staleBlocks / totalGenBlocks;
 	averBlockSize /= mainBlocks;
-	cout << "totalBlockNum: " << totalGenBlocks << endl;
-	cout << "Block Number: " << mainBlocks << endl;
-	cout << "Average Block Size: " << averBlockSize << endl;
-	if(FLAG == 0) {
-		cout << "Stale Blocks: " << staleBlocks << endl;
-		cout << "Stale Rate: " << staleRate * 100 << "%" << endl;
-		res = staleRate * 100;
+	if(FLAG == 0) st.write(rd, t, (double)SIM_TIME/totalGenBlocks, averBlockSize, mainBlocks, staleBlocks, halfBPD/count, ninetyBPD/count, staleRate);
+	else {
+		st.write(rd, t, (double)SIM_TIME/totalGenBlocks, averBlockSize, mainBlocks, uncleBlocks, halfBPD/count, ninetyBPD/count, uncleRate);
 	}
-	if(FLAG == 1) {
-		cout << "Uncle Blocks: " << uncleBlocks << endl;
-		cout << "Uncle Rate: " << uncleRate * 100 << "%" << endl;
-		res = uncleRate * 100;
-	}
-
-	/*for(int i=0; i<mainBlocks; i++) {
-		cout << nodePool[globalchain]->mainchain[i]->id;
-		if(!nodePool[globalchain]->mainchain[i]->uncles.empty()) {
-			for(int j=0; j<nodePool[globalchain]->mainchain[i]->uncles.size(); j++) {
-				cout << " " << nodePool[globalchain]->mainchain[i]->uncles[j];
-			}
-		}
-		cout << endl;
-	}*/
 	return res;
 }
 

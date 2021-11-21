@@ -5,7 +5,6 @@
 Node::Node()
 {
 	neighborNum = 0;
-	hashPower = AVER_HASH_POWER;
 	hasMiningEvent = false;
 	auto block = make_shared<Block>();
 	AddBlock(block);

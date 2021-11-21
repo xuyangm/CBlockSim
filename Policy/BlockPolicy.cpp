@@ -10,6 +10,12 @@ BlockPolicy::BlockPolicy()
 
 void BlockPolicy::GenBlock(int miner, double currentTime, vector<unique_ptr<Node>> &nodePool, EventEngine &evEngine)
 {
+	if(PROPOSAL_POLICY == 0) LoadPoW(miner, currentTime, nodePool, evEngine);
+	if(PROPOSAL_POLICY == 1) LoadPoS(miner, currentTime, nodePool, evEngine);
+}
+
+void BlockPolicy::LoadPoW(int miner, double currentTime, vector<unique_ptr<Node>> &nodePool, EventEngine &evEngine)
+{
 	random_device rd;
 	mt19937 gen(rd());
 	exponential_distribution<double> GenTime(nodePool[miner]->hashPower / BLOCK_INTERVAL);
@@ -33,10 +39,38 @@ void BlockPolicy::GenBlock(int miner, double currentTime, vector<unique_ptr<Node
 	}
 }
 
+void BlockPolicy::LoadPoS(int miner, double currentTime, vector<unique_ptr<Node>> &nodePool, EventEngine &evEngine)
+{
+	random_device rd;
+	mt19937 gen(rd());
+	double totalStake = 0;
+	for(int i=0; i<nodePool.size(); i++) totalStake += nodePool[i]->stake * (currentTime-nodePool[i]->stakeTime);
+	exponential_distribution<double> GenTime(nodePool[miner]->stake*(currentTime-nodePool[miner]->stakeTime) / totalStake / BLOCK_INTERVAL);
+    Event e;
+	if (nodePool[miner]->hashPower > 0) {
+		e.owner = miner;
+		e.type = GENERATE_BLOCK;
+		e.timestamp = currentTime + GenTime(gen);
+		if (e.timestamp <= SIM_TIME) {
+			e.block = make_shared<Block>();
+			e.block->id = nextBKID++;
+			e.block->depth = nodePool[miner]->mainchain.back()->depth + 1;
+			e.block->diff = nodePool[miner]->mainchain.back()->diff + 1;
+			e.block->miner = miner;
+			e.block->prevBlock = nodePool[miner]->mainchain.back()->id;
+			e.block->size = BLOCK_SIZE;
+			e.block->timestamp = e.timestamp; 
+            nodePool[miner]->miningEvent = evEngine.AddEvent(e);
+			nodePool[miner]->hasMiningEvent = true;
+			nodePool[miner]->stakeTime = currentTime;
+		}
+	}
+}
+
 void BlockPolicy::PropagateBlock(shared_ptr<Block> block, double topo[NODES_NUM][NODES_NUM], vector<unique_ptr<Node>> &nodePool, double delays[NODES_NUM])
 {
-	if(FLAG == 0) LoadBitcoinPropagation(block, topo, nodePool, delays);
-    if(FLAG == 1) LoadEthereumPropagation(block, topo, nodePool, delays);
+	if(PROPAGATION_POLICY == 0) LoadBitcoinPropagation(block, topo, nodePool, delays);
+    if(PROPAGATION_POLICY == 1) LoadEthereumPropagation(block, topo, nodePool, delays);
 }
 
 void BlockPolicy::LoadBitcoinPropagation(shared_ptr<Block> block, double topo[NODES_NUM][NODES_NUM], vector<unique_ptr<Node>> &nodePool, double delays[NODES_NUM])
@@ -127,8 +161,9 @@ void BlockPolicy::LoadEthereumPropagation(shared_ptr<Block> block, double topo[N
 					bandwidth = min(UPLOAD_BANDWIDTHS[loc_from], DOWNLOAD_BANDWIDTHS[loc_to]);
 				}
 				double new_dis;
-				if (rand() % nodePool[update_nid]->neighborNum + 1 <= (int)sqrt(nodePool[update_nid]->neighborNum)) new_dis = dis + topo[update_nid][i] + block->size / bandwidth + BLOCK_VALIDATION * block->size;
-				else {
+				if (rand() % nodePool[update_nid]->neighborNum + 1 <= (int)sqrt(nodePool[update_nid]->neighborNum)) {
+					new_dis = dis + topo[update_nid][i] + block->size / bandwidth + BLOCK_VALIDATION * block->size;
+				} else {
 					new_dis = dis + 5 * topo[update_nid][i] + block->size / bandwidth + BLOCK_VALIDATION * block->size + 0.5;
 				}
 				if (delays[i] > new_dis) {
@@ -148,8 +183,8 @@ void BlockPolicy::LoadEthereumPropagation(shared_ptr<Block> block, double topo[N
 
 void BlockPolicy::FinalizeBlock(multiset<Event>::iterator e, vector<unique_ptr<Node>> &nodePool, EventEngine &evEngine)
 {
-    if(LONGEST) LoadLongestRule(e, nodePool, evEngine);
-	if(GHOST) LoadGHOSTRule(e, nodePool, evEngine);
+    if(FINALIZE_POLICY == 0) LoadLongestRule(e, nodePool, evEngine);
+	if(FINALIZE_POLICY == 1) LoadGHOSTRule(e, nodePool, evEngine);
 }
 
 void BlockPolicy::LoadLongestRule(multiset<Event>::iterator e, vector<unique_ptr<Node>> &nodePool, EventEngine &evEngine)

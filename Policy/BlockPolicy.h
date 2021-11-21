@@ -12,6 +12,8 @@ public:
     int nextBKID;
 
     void GenBlock(int miner, double currentTime, vector<unique_ptr<Node>> &nodePool, EventEngine &evEngine);
+    void LoadPoW(int miner, double currentTime, vector<unique_ptr<Node>> &nodePool, EventEngine &evEngine);
+    void LoadPoS(int miner, double currentTime, vector<unique_ptr<Node>> &nodePool, EventEngine &evEngine);
 
     void PropagateBlock(shared_ptr<Block> block, double topo[NODES_NUM][NODES_NUM], vector<unique_ptr<Node>> &nodePool, double delays[NODES_NUM]);
     void LoadBitcoinPropagation(shared_ptr<Block> block, double topo[NODES_NUM][NODES_NUM], vector<unique_ptr<Node>> &nodePool, double delays[NODES_NUM]);

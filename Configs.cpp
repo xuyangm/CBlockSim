@@ -1,7 +1,7 @@
 #include "Configs.h"
 
 const std::string REGIONS_NAME[REGIONS_NUM] = { "NorthAmerica", "Europe", "SouthAmerica", "AsiaPacific", "Japan", "Australia" };
-const double REGIONS_DISTRIBUTION[REGIONS_NUM] = {0.2712, 0.5539, 0.0094, 0.1235, 0.0253, 0.0168};//{ 0.476, 0.222, 0, 0.297, 0.005, 0 }; // NodeTracker + Archive 2019
+const double REGIONS_DISTRIBUTION[REGIONS_NUM] = { 0.476, 0.222, 0, 0.297, 0.005, 0 }; //{0.2712, 0.5539, 0.0094, 0.1235, 0.0253, 0.0168};//{ 0.476, 0.222, 0, 0.297, 0.005, 0 }; // NodeTracker + Archive 2019
 
 // Latency&Bandwidth Settings
 const double LATENCIES[REGIONS_NUM][REGIONS_NUM] = { {0.032, 0.124, 0.184, 0.198, 0.151, 0.189},
