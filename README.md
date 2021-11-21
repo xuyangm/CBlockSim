@@ -1,2 +1,2 @@
-cd build/
+cd build/<br>
 bash start.sh
